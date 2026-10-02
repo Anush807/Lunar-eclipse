@@ -1,6 +1,14 @@
 <title>Umbral Passage</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Spectral:wght@300;400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
+  /* Registered integers so the readouts can be animated and printed by
+     counter() — the whole page runs on CSS animation, no script. */
+  @property --th{syntax:"<integer>";initial-value:0;inherits:false}
+  @property --tm{syntax:"<integer>";initial-value:0;inherits:false}
+  @property --mi{syntax:"<integer>";initial-value:0;inherits:false}
+  @property --mf{syntax:"<integer>";initial-value:0;inherits:false}
+  @property --sp{syntax:"<integer>";initial-value:0;inherits:false}
+
   :root{
     --sky-0:#070a12;
     --sky-1:#0b1120;
@@ -18,8 +26,6 @@
     --display:"Bodoni Moda",Didot,"Times New Roman",serif;
     --body:"Spectral",Georgia,serif;
     --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
-
-    --dur:26s;
   }
 
   *{box-sizing:border-box}
@@ -41,43 +47,45 @@
 
   /* ---------- title block ---------- */
   .eyebrow{
-    font-family:var(--mono);
-    font-size:11px;
-    letter-spacing:.18em;
-    text-transform:uppercase;
-    color:var(--steel);
-    margin:0 0 14px;
+    font-family:var(--mono);font-size:11px;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--steel);margin:0 0 14px;
   }
   h1{
-    font-family:var(--display);
-    font-weight:400;
-    font-size:clamp(42px,10vw,78px);
-    line-height:.96;
-    letter-spacing:-.015em;
-    margin:0 0 18px;
-    text-wrap:balance;
+    font-family:var(--display);font-weight:400;
+    font-size:clamp(42px,10vw,78px);line-height:.96;letter-spacing:-.015em;
+    margin:0 0 18px;text-wrap:balance;
   }
   h1 em{font-style:italic;color:var(--copper-lite)}
-  .standfirst{
-    max-width:60ch;
-    margin:0;
-    font-size:17px;
-    font-weight:300;
-    color:#c3c7cf;
-  }
+  .standfirst{max-width:60ch;margin:0;font-size:17px;font-weight:300;color:#c3c7cf}
   .rule{height:1px;background:var(--line);border:0;margin:30px 0}
+
+  /* ---------- the clock every animation shares ---------- */
+  .world{
+    --dur:26s;
+    /* Opens 26% in — mid partial ingress, a readable bite out of the disc. */
+    --delay:calc(var(--dur) * -0.26);
+  }
+  .is-anim{
+    animation-duration:var(--dur);
+    animation-delay:var(--delay);
+    animation-timing-function:linear;
+    animation-iteration-count:infinite;
+  }
+
+  /* playback: checkbox holds the frame, radios set the duration */
+  .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  #hold:checked ~ .world .is-anim,
+  #hold:checked ~ .world .tw{animation-play-state:paused}
+  #sp05:checked ~ .world{--dur:52s}
+  #sp2:checked  ~ .world{--dur:13s}
+  #sp4:checked  ~ .world{--dur:6.5s}
 
   /* ---------- stage ---------- */
   .scene-wrap{container-type:inline-size;margin:0 0 18px}
   .scene{
-    position:relative;
-    width:100%;
-    max-width:100%;
-    aspect-ratio:4/3;
-    border:1px solid var(--line);
-    border-radius:2px;
-    overflow:hidden;
-    isolation:isolate;
+    position:relative;width:100%;max-width:100%;aspect-ratio:4/3;
+    border:1px solid var(--line);border-radius:2px;
+    overflow:hidden;isolation:isolate;
     background:
       radial-gradient(ellipse 80% 70% at 50% 118%, #13203a 0%, transparent 70%),
       linear-gradient(180deg,#05070e,#0a0f1d);
@@ -85,35 +93,38 @@
 
   .stars{
     position:absolute;inset:0;
+    animation-name:skyDeepen;
     background-image:
       radial-gradient(1.2px 1.2px at 24px 32px, rgba(233,230,221,.95), transparent 100%),
       radial-gradient(1px 1px at 96px 104px, rgba(197,214,232,.75), transparent 100%),
       radial-gradient(1.5px 1.5px at 148px 54px, rgba(233,230,221,.6), transparent 100%),
       radial-gradient(1px 1px at 58px 142px, rgba(220,226,236,.5), transparent 100%);
     background-size:172px 150px,214px 188px,251px 226px,133px 197px;
-    animation:skyDeepen var(--dur) linear infinite;
   }
-  .twinkle{
+  /* twinkles keep their own cadence, so they are classes, not shorthands —
+     an inline animation shorthand would re-assert play-state and never pause */
+  .tw{
     position:absolute;width:2px;height:2px;border-radius:50%;
-    background:var(--moonlight);
-    box-shadow:0 0 5px rgba(233,230,221,.8);
+    background:var(--moonlight);box-shadow:0 0 5px rgba(233,230,221,.8);
+    animation:tw 4s ease-in-out infinite;
   }
+  .tw1{left:12%;top:18%;animation-duration:3.1s}
+  .tw2{left:84%;top:26%;animation-duration:4.4s;animation-delay:.7s}
+  .tw3{left:68%;top:78%;animation-duration:3.7s;animation-delay:1.4s}
+  .tw4{left:22%;top:84%;animation-duration:5.2s;animation-delay:.3s}
+  .tw5{left:46%;top:9%;animation-duration:4.1s;animation-delay:2.1s}
+  .tw6{left:92%;top:62%;animation-duration:3.4s;animation-delay:1.1s}
 
   /* dashed path + contact ticks */
-  .path{
-    position:absolute;left:4%;right:4%;top:50%;height:0;
-    border-top:1px dashed var(--line);
-  }
-  .tick{
-    position:absolute;top:50%;width:1px;height:3.4cqw;
-    background:var(--line);
-    transform:translateY(0.6cqw);
-  }
+  .path{position:absolute;left:4%;right:4%;top:50%;height:0;border-top:1px dashed var(--line)}
+  .tick{position:absolute;top:50%;width:1px;height:3.4cqw;background:var(--line);transform:translateY(.6cqw)}
   .tick span{
     position:absolute;top:3.9cqw;left:50%;transform:translateX(-50%);
-    font-family:var(--mono);font-size:max(9px,1.9cqw);
-    letter-spacing:.08em;color:var(--steel);white-space:nowrap;
+    font-family:var(--mono);font-size:max(9px,1.9cqw);letter-spacing:.08em;
+    color:var(--steel);white-space:nowrap;
   }
+  .tick.gr{background:rgba(180,86,47,.5)}
+  .tick.gr span{color:var(--copper-lite)}
 
   /* the Moon */
   .moon{
@@ -121,20 +132,16 @@
     width:13.33cqw;aspect-ratio:1;
     margin-left:-6.665cqw;margin-top:-6.665cqw;
     border-radius:50%;
-    animation:moonMarch var(--dur) linear infinite;
+    animation-name:moonMarch;
   }
-  .moon-glow{
-    position:absolute;inset:0;border-radius:50%;
-    animation:moonGlow var(--dur) linear infinite;
-  }
+  .moon-glow{position:absolute;inset:0;border-radius:50%;animation-name:moonGlow}
   .moon-disc{
-    position:absolute;inset:0;border-radius:50%;
+    position:absolute;inset:0;border-radius:50%;isolation:isolate;overflow:hidden;
     background:radial-gradient(circle at 36% 30%, #faf7ef 0%, #e6e1d3 52%, #cdc6b6 82%, #a9a294 100%);
-    box-shadow:inset -0.5cqw -0.5cqw 1.6cqw rgba(30,26,22,.35);
-    overflow:hidden;
+    box-shadow:inset -.5cqw -.5cqw 1.6cqw rgba(30,26,22,.35);
   }
   .maria{
-    position:absolute;inset:0;border-radius:50%;
+    position:absolute;inset:0;border-radius:50%;mix-blend-mode:multiply;opacity:.9;
     background:
       radial-gradient(circle at 33% 27%, rgba(118,114,106,.42) 0 18%, transparent 19%),
       radial-gradient(circle at 54% 22%, rgba(118,114,106,.32) 0 11%, transparent 12%),
@@ -142,16 +149,13 @@
       radial-gradient(circle at 30% 58%, rgba(130,124,114,.26) 0 13%, transparent 14%),
       radial-gradient(circle at 78% 70%, rgba(252,250,245,.55) 0 4%, transparent 9%),
       radial-gradient(circle at 46% 78%, rgba(248,245,238,.45) 0 3%, transparent 7%);
-    mix-blend-mode:multiply;
-    opacity:.9;
   }
 
-  /* Earth's shadow — multiplies onto whatever it covers */
+  /* Earth's shadow — multiplies onto whatever it covers, so it is invisible
+     against the sky and only darkens the Moon */
   .penumbra,.umbra{
     position:absolute;left:50%;top:50%;border-radius:50%;
-    transform:translate(-50%,-50%);
-    mix-blend-mode:multiply;
-    pointer-events:none;
+    transform:translate(-50%,-50%);mix-blend-mode:multiply;pointer-events:none;
   }
   .penumbra{
     width:64.58cqw;aspect-ratio:1;
@@ -165,11 +169,7 @@
   }
 
   /* chart outlines of the two shadow boundaries */
-  .edge{
-    position:absolute;left:50%;top:50%;border-radius:50%;
-    transform:translate(-50%,-50%);
-    pointer-events:none;
-  }
+  .edge{position:absolute;left:50%;top:50%;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none}
   .edge-p{width:64.58cqw;aspect-ratio:1;border:1px dashed rgba(125,147,168,.26)}
   .edge-u{width:38.75cqw;aspect-ratio:1;border:1px solid rgba(180,86,47,.34)}
   .edge-label{
@@ -180,7 +180,7 @@
   .edge-label.p{top:calc(50% - 34.5cqw)}
   .edge-label.u{top:calc(50% - 21.6cqw);color:rgba(217,138,82,.85)}
 
-  /* ---------- keyframes ---------- */
+  /* ---------- keyframes: the stage ---------- */
   @keyframes moonMarch{
     from{transform:translateX(-38.96cqw)}
     to{transform:translateX(38.96cqw)}
@@ -196,57 +196,126 @@
   }
   @keyframes skyDeepen{
     0%,8%{opacity:.42}
-    33.7%{opacity:1}
-    66.3%{opacity:1}
+    33.7%,66.3%{opacity:1}
     92%,100%{opacity:.42}
   }
   @keyframes tw{0%,100%{opacity:.25}50%{opacity:1}}
 
+  /* ---------- keyframes: the readouts ----------
+     Elapsed time, 0 to 356 minutes. Hours step; minutes ramp 0-59 and reset
+     at each hour boundary (one hour = 16.854% of the passage). */
+  @keyframes clkH{
+    0%,16.853%{--th:0}
+    16.854%,33.707%{--th:1}
+    33.708%,50.561%{--th:2}
+    50.562%,67.415%{--th:3}
+    67.416%,84.269%{--th:4}
+    84.27%,100%{--th:5}
+  }
+  @keyframes clkM{
+    0%{--tm:0}    16.853%{--tm:59}
+    16.854%{--tm:0} 33.707%{--tm:59}
+    33.708%{--tm:0} 50.561%{--tm:59}
+    50.562%{--tm:0} 67.415%{--tm:59}
+    67.416%{--tm:0} 84.269%{--tm:59}
+    84.27%{--tm:0}  100%{--tm:56}
+  }
+  /* Umbral magnitude = (45' + 15.5' - separation) / 31', printed as two
+     counters so the decimal point can sit between them. */
+  @keyframes magI{
+    0%,33.69%{--mi:0}
+    33.7%,66.29%{--mi:1}
+    66.3%,100%{--mi:0}
+  }
+  @keyframes magF{
+    0%,16.6%{--mf:0}
+    33.69%{--mf:99}
+    33.7%{--mf:0}
+    50%{--mf:95}
+    66.29%{--mf:0}
+    66.3%{--mf:99}
+    83.4%,100%{--mf:0}
+  }
+  /* Separation of the two centres, in arcminutes. */
+  @keyframes sepK{0%{--sp:90}50%{--sp:0}100%{--sp:90}}
+  /* Magnitude meter: track spans 0 to 2.00, so 1.95 fills 97.5%. */
+  @keyframes magBar{
+    0%,16.6%{width:0%}
+    50%{width:97.5%}
+    83.4%,100%{width:0%}
+  }
+  /* Phase name reel: five labels in a 1.5em window. */
+  @keyframes reel{
+    0%,16.59%{transform:translateY(0)}
+    16.6%,33.69%{transform:translateY(-1.5em)}
+    33.7%,66.29%{transform:translateY(-3em)}
+    66.3%,83.39%{transform:translateY(-4.5em)}
+    83.4%,100%{transform:translateY(-6em)}
+  }
+
   /* ---------- readout strip ---------- */
   .readout{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-    gap:1px;
-    background:var(--line-soft);
-    border:1px solid var(--line);
-    margin:0 0 20px;
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));
+    gap:1px;background:var(--line-soft);border:1px solid var(--line);margin:0 0 20px;
   }
   .cell{background:var(--panel);padding:12px 14px}
   .cell dt{
     font-family:var(--mono);font-size:10px;letter-spacing:.16em;
-    text-transform:uppercase;color:var(--steel);margin:0 0 4px;
+    text-transform:uppercase;color:var(--steel);margin:0 0 5px;
   }
   .cell dd{
     margin:0;font-family:var(--mono);font-size:19px;
     font-variant-numeric:tabular-nums;color:var(--moonlight);
   }
   .cell dd small{font-size:12px;color:var(--muted)}
-  #r-phase{font-size:14px;line-height:1.5}
+
+  .clock{counter-reset:h var(--th) m var(--tm);animation-name:clkH,clkM}
+  .clock::after{content:counter(h) ":" counter(m,decimal-leading-zero)}
+  .mag{counter-reset:i var(--mi) f var(--mf);animation-name:magI,magF}
+  .mag::after{content:counter(i) "." counter(f,decimal-leading-zero)}
+  .sep{counter-reset:s var(--sp);animation-name:sepK}
+  .sep::after{content:counter(s) "′"}
+
+  .reel-win{height:1.5em;overflow:hidden}
+  .reel{animation-name:reel}
+  .reel span{display:block;height:1.5em;line-height:1.5em;font-size:14px;white-space:nowrap}
+
+  .meter{position:relative;height:5px;margin-top:9px;background:rgba(125,147,168,.16)}
+  .meter-fill{position:absolute;inset:0 auto 0 0;background:var(--copper);animation-name:magBar}
+  .meter-tick{position:absolute;top:-3px;bottom:-3px;left:50%;width:1px;background:rgba(233,230,221,.4)}
+  .meter-note{
+    display:block;margin-top:6px;font-family:var(--mono);font-size:9px;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--steel);
+  }
 
   /* ---------- controls ---------- */
-  .controls{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:0 0 34px}
-  button,select{
+  .bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 34px}
+  .btn{
     font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;
     color:var(--moonlight);background:var(--panel-2);
     border:1px solid var(--line);border-radius:2px;
-    padding:9px 16px;cursor:pointer;
+    padding:9px 16px;cursor:pointer;user-select:none;
   }
-  button:hover,select:hover{border-color:var(--copper);color:var(--copper-lite)}
-  :focus-visible{outline:2px solid var(--copper-lite);outline-offset:2px}
-  .scrub-wrap{flex:1 1 220px;display:flex;align-items:center;gap:10px;min-width:180px}
-  input[type=range]{
-    flex:1;-webkit-appearance:none;appearance:none;height:22px;background:transparent;cursor:ew-resize;
-  }
-  input[type=range]::-webkit-slider-runnable-track{height:2px;background:var(--line)}
-  input[type=range]::-moz-range-track{height:2px;background:var(--line)}
-  input[type=range]::-webkit-slider-thumb{
-    -webkit-appearance:none;width:12px;height:12px;border-radius:50%;
-    background:var(--copper-lite);border:0;margin-top:-5px;
-  }
-  input[type=range]::-moz-range-thumb{
-    width:12px;height:12px;border-radius:50%;background:var(--copper-lite);border:0;
-  }
-  .ctl-label{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--steel)}
+  .btn:hover{border-color:var(--copper);color:var(--copper-lite)}
+  .seg{display:flex;gap:1px;background:var(--line-soft);border:1px solid var(--line);border-radius:2px}
+  .seg .btn{border:0;border-radius:0;padding:9px 13px;color:var(--steel)}
+  .ctl-note{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--steel)}
+
+  #sp05:checked ~ .world label[for=sp05],
+  #sp1:checked  ~ .world label[for=sp1],
+  #sp2:checked  ~ .world label[for=sp2],
+  #sp4:checked  ~ .world label[for=sp4]{background:var(--ember);color:var(--copper-lite)}
+
+  #hold:focus-visible ~ .world label[for=hold],
+  #sp05:focus-visible ~ .world label[for=sp05],
+  #sp1:focus-visible  ~ .world label[for=sp1],
+  #sp2:focus-visible  ~ .world label[for=sp2],
+  #sp4:focus-visible  ~ .world label[for=sp4]{outline:2px solid var(--copper-lite);outline-offset:2px}
+
+  /* the button names the action, and the action flips with the checkbox */
+  .lbl .resume{display:none}
+  #hold:checked ~ .world .lbl .hold{display:none}
+  #hold:checked ~ .world .lbl .resume{display:inline}
 
   /* ---------- phase table ---------- */
   h2{
@@ -255,19 +324,10 @@
   }
   .phases{display:flex;flex-direction:column;gap:1px;background:var(--line-soft);border-block:1px solid var(--line)}
   .ph{
-    display:grid;
-    grid-template-columns:2.4em 1fr auto;
-    align-items:baseline;gap:4px 14px;
-    padding:11px 14px 11px 10px;
-    border-left:2px solid transparent;
-    background:var(--panel);
-    animation-duration:var(--dur);
-    animation-timing-function:linear;
-    animation-iteration-count:infinite;
+    display:grid;grid-template-columns:2.4em 1fr auto;align-items:baseline;gap:4px 14px;
+    padding:11px 14px 11px 10px;border-left:2px solid transparent;background:var(--panel);
   }
-  .ph .mark{
-    font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--steel);
-  }
+  .ph .mark{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--steel)}
   .ph .what{font-size:15px;color:var(--muted)}
   .ph .what b{font-weight:600;font-variant:small-caps;letter-spacing:.04em}
   .ph .when{
@@ -281,10 +341,8 @@
   .ph:nth-child(5){animation-name:ph5}
 
   @keyframes ph1{
-    0%{background:var(--ember);border-left-color:var(--copper)}
-    16.59%{background:var(--ember);border-left-color:var(--copper)}
-    16.6%{background:var(--panel);border-left-color:transparent}
-    100%{background:var(--panel);border-left-color:transparent}
+    0%,16.59%{background:var(--ember);border-left-color:var(--copper)}
+    16.6%,100%{background:var(--panel);border-left-color:transparent}
   }
   @keyframes ph2{
     0%,16.59%{background:var(--panel);border-left-color:transparent}
@@ -303,8 +361,7 @@
   }
   @keyframes ph5{
     0%,83.39%{background:var(--panel);border-left-color:transparent}
-    83.4%{background:var(--ember);border-left-color:var(--copper)}
-    100%{background:var(--ember);border-left-color:var(--copper)}
+    83.4%,100%{background:var(--ember);border-left-color:var(--copper)}
   }
 
   /* ---------- lower matter ---------- */
@@ -323,19 +380,16 @@
     font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
     color:var(--steel);margin-top:10px;line-height:1.6;
   }
-  .geo{
-    width:100%;height:auto;display:block;
-    border:1px solid var(--line);border-radius:2px;background:#05070e;
-  }
+  .geo{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:2px;background:#05070e}
   .geo text{font-family:var(--mono);font-size:10px;letter-spacing:.1em;fill:var(--steel)}
-
   @keyframes orbitRun{from{transform:translateX(0)}to{transform:translateX(168px)}}
-  .geo-moon{animation:orbitRun var(--dur) linear infinite}
+  .geo-moon{animation-name:orbitRun}
 
-  .danjon{list-style:none;margin:22px 0 0;padding:0;display:flex;flex-direction:column;gap:1px;
-    background:var(--line-soft);border-block:1px solid var(--line)}
-  .danjon li{display:grid;grid-template-columns:2.2em 1.6em 1fr;align-items:center;gap:12px;
-    background:var(--panel);padding:8px 12px}
+  .danjon{
+    list-style:none;margin:22px 0 0;padding:0;display:flex;flex-direction:column;gap:1px;
+    background:var(--line-soft);border-block:1px solid var(--line);
+  }
+  .danjon li{display:grid;grid-template-columns:2.2em 1.6em 1fr;align-items:center;gap:12px;background:var(--panel);padding:8px 12px}
   .danjon .lv{font-family:var(--mono);font-size:11px;color:var(--steel)}
   .danjon .sw{width:18px;height:18px;border-radius:50%;border:1px solid rgba(233,230,221,.14)}
   .danjon .ds{font-size:13px;font-weight:300;color:var(--muted);line-height:1.45}
@@ -345,8 +399,15 @@
     font-family:var(--mono);font-size:11px;line-height:1.8;letter-spacing:.03em;color:var(--steel);
   }
 
+  /* Still by default when motion is unwelcome; the same control starts it. */
   @media (prefers-reduced-motion:reduce){
-    .stars,.twinkle,.moon,.moon-glow,.ph,.geo-moon{animation-play-state:paused}
+    .world .is-anim,.world .tw{animation-play-state:paused}
+    #hold:checked ~ .world .is-anim,
+    #hold:checked ~ .world .tw{animation-play-state:running}
+    .lbl .hold{display:none}
+    .lbl .resume{display:inline}
+    #hold:checked ~ .world .lbl .hold{display:inline}
+    #hold:checked ~ .world .lbl .resume{display:none}
   }
 </style>
 
@@ -363,266 +424,187 @@
 
   <hr class="rule">
 
-  <div class="scene-wrap">
-    <div class="scene" id="scene">
-      <div class="stars"></div>
-      <div class="twinkle" style="left:12%;top:18%;animation:tw 3.1s ease-in-out infinite"></div>
-      <div class="twinkle" style="left:84%;top:26%;animation:tw 4.4s ease-in-out .7s infinite"></div>
-      <div class="twinkle" style="left:68%;top:78%;animation:tw 3.7s ease-in-out 1.4s infinite"></div>
-      <div class="twinkle" style="left:22%;top:84%;animation:tw 5.2s ease-in-out .3s infinite"></div>
-      <div class="twinkle" style="left:46%;top:9%;animation:tw 4.1s ease-in-out 2.1s infinite"></div>
-      <div class="twinkle" style="left:92%;top:62%;animation:tw 3.4s ease-in-out 1.1s infinite"></div>
+  <input class="vh" type="checkbox" id="hold">
+  <input class="vh" type="radio" name="sp" id="sp05">
+  <input class="vh" type="radio" name="sp" id="sp1" checked>
+  <input class="vh" type="radio" name="sp" id="sp2">
+  <input class="vh" type="radio" name="sp" id="sp4">
 
-      <div class="path"></div>
-      <div class="tick" style="left:11.04%"><span>P1</span></div>
-      <div class="tick" style="left:23.96%"><span>U1</span></div>
-      <div class="tick" style="left:37.29%"><span>U2</span></div>
-      <div class="tick" style="left:50%"><span>GR</span></div>
-      <div class="tick" style="left:62.71%"><span>U3</span></div>
-      <div class="tick" style="left:76.04%"><span>U4</span></div>
-      <div class="tick" style="left:88.96%"><span>P4</span></div>
+  <div class="world">
 
-      <div class="moon" id="moon">
-        <div class="moon-glow"></div>
-        <div class="moon-disc"><div class="maria"></div></div>
+    <div class="scene-wrap">
+      <div class="scene">
+        <div class="stars is-anim"></div>
+        <div class="tw tw1"></div>
+        <div class="tw tw2"></div>
+        <div class="tw tw3"></div>
+        <div class="tw tw4"></div>
+        <div class="tw tw5"></div>
+        <div class="tw tw6"></div>
+
+        <div class="path"></div>
+        <div class="tick" style="left:11.04%"><span>P1</span></div>
+        <div class="tick" style="left:23.96%"><span>U1</span></div>
+        <div class="tick" style="left:37.29%"><span>U2</span></div>
+        <div class="tick gr" style="left:50%"><span>GR</span></div>
+        <div class="tick" style="left:62.71%"><span>U3</span></div>
+        <div class="tick" style="left:76.04%"><span>U4</span></div>
+        <div class="tick" style="left:88.96%"><span>P4</span></div>
+
+        <div class="moon is-anim">
+          <div class="moon-glow is-anim"></div>
+          <div class="moon-disc"><div class="maria"></div></div>
+        </div>
+
+        <div class="penumbra"></div>
+        <div class="umbra"></div>
+
+        <div class="edge edge-p"></div>
+        <div class="edge edge-u"></div>
+        <div class="edge-label p">penumbra · 75′</div>
+        <div class="edge-label u">umbra · 45′</div>
+      </div>
+    </div>
+
+    <dl class="readout" aria-hidden="true">
+      <div class="cell">
+        <dt>Elapsed from P1</dt>
+        <dd class="clock is-anim"></dd>
+      </div>
+      <div class="cell">
+        <dt>Phase</dt>
+        <dd class="reel-win">
+          <div class="reel is-anim">
+            <span>Penumbral ingress</span>
+            <span>Partial ingress</span>
+            <span>Totality</span>
+            <span>Partial egress</span>
+            <span>Penumbral egress</span>
+          </div>
+        </dd>
+      </div>
+      <div class="cell">
+        <dt>Umbral magnitude</dt>
+        <dd class="mag is-anim"></dd>
+        <div class="meter"><div class="meter-fill is-anim"></div><div class="meter-tick"></div></div>
+        <span class="meter-note">tick = 1.00, fully immersed</span>
+      </div>
+      <div class="cell">
+        <dt>Centres apart</dt>
+        <dd class="sep is-anim"></dd>
+      </div>
+    </dl>
+
+    <div class="bar">
+      <label class="btn lbl" for="hold">
+        <span class="hold">Hold frame</span><span class="resume">Resume</span>
+      </label>
+      <div class="seg" role="group" aria-label="Playback speed">
+        <label class="btn" for="sp05">0.5×</label>
+        <label class="btn" for="sp1">1×</label>
+        <label class="btn" for="sp2">2×</label>
+        <label class="btn" for="sp4">4×</label>
+      </div>
+      <span class="ctl-note">1× = 26s per passage</span>
+    </div>
+
+    <h2>Contacts and phases</h2>
+    <div class="phases">
+      <div class="ph is-anim">
+        <span class="mark">P1→U1</span>
+        <span class="what"><b>Penumbral ingress.</b> A faint, flat grey wash on the leading limb — easy to miss by eye.</span>
+        <span class="when">0:00 · 59m</span>
+      </div>
+      <div class="ph is-anim">
+        <span class="mark">U1→U2</span>
+        <span class="what"><b>Partial ingress.</b> The umbra's curved edge bites in and crosses the disc.</span>
+        <span class="when">0:59 · 61m</span>
+      </div>
+      <div class="ph is-anim">
+        <span class="mark">U2→U3</span>
+        <span class="what"><b>Totality.</b> Wholly inside the umbra; greatest eclipse at 2:58, the Moon at its dimmest and reddest.</span>
+        <span class="when">2:00 · 1h56m</span>
+      </div>
+      <div class="ph is-anim">
+        <span class="mark">U3→U4</span>
+        <span class="what"><b>Partial egress.</b> A bright sliver returns on the leading limb and widens.</span>
+        <span class="when">3:56 · 61m</span>
+      </div>
+      <div class="ph is-anim">
+        <span class="mark">U4→P4</span>
+        <span class="what"><b>Penumbral egress.</b> The last grey shading thins away; the Moon is full again.</span>
+        <span class="when">4:57 · 59m</span>
+      </div>
+    </div>
+
+    <div class="cols">
+      <div class="prose">
+        <h2>Why it goes copper</h2>
+        <p class="drop">Nothing inside the umbra receives direct sunlight, so a totally eclipsed Moon ought to vanish. It doesn't. Earth's atmosphere refracts sunlight around the planet's limb and into the shadow, and on the way through it scatters the short wavelengths out — the same Rayleigh scattering that reddens a low Sun.</p>
+        <p>What reaches the Moon is therefore the light of <b>every sunrise and sunset on Earth at once</b>, focused into the shadow cone. Totality runs about 10,000 times fainter than a full Moon, and its colour reports on our own air: volcanic aerosol or heavy cloud along the terminator darkens it toward brown, clear air leaves it brick-red with a bright bluish rim where the refracted light has passed through the ozone layer.</p>
+        <p>Observers grade that appearance on <b>Danjon's five-point scale</b>, estimated at greatest eclipse with the unaided eye.</p>
+        <ul class="danjon">
+          <li><span class="lv">L = 0</span><span class="sw" style="background:#241a18"></span><span class="ds">Very dark; the Moon nearly invisible at mid-totality.</span></li>
+          <li><span class="lv">L = 1</span><span class="sw" style="background:#46302a"></span><span class="ds">Dark grey or brownish; detail hard to make out.</span></li>
+          <li><span class="lv">L = 2</span><span class="sw" style="background:#6e2f22"></span><span class="ds">Deep red or rust, with a darker umbral centre.</span></li>
+          <li><span class="lv">L = 3</span><span class="sw" style="background:#9c4425"></span><span class="ds">Brick-red, often with a brighter yellow rim.</span></li>
+          <li><span class="lv">L = 4</span><span class="sw" style="background:#c4682f"></span><span class="ds">Bright copper-orange; very bright, bluish rim.</span></li>
+        </ul>
       </div>
 
-      <div class="penumbra"></div>
-      <div class="umbra"></div>
+      <figure>
+        <h2>The shadow in section</h2>
+        <svg class="geo" viewBox="0 0 440 210" role="img"
+             aria-label="Side view: sunlight past the Earth forms a diverging penumbra and a converging umbra, and the Moon's orbit carries it through both.">
+          <defs>
+            <linearGradient id="pen" x1="0" x2="1">
+              <stop offset="0" stop-color="#7d93a8" stop-opacity=".16"/>
+              <stop offset="1" stop-color="#7d93a8" stop-opacity=".05"/>
+            </linearGradient>
+            <linearGradient id="umb" x1="0" x2="1">
+              <stop offset="0" stop-color="#b4562f" stop-opacity=".42"/>
+              <stop offset="1" stop-color="#b4562f" stop-opacity=".16"/>
+            </linearGradient>
+          </defs>
 
-      <div class="edge edge-p"></div>
-      <div class="edge edge-u"></div>
-      <div class="edge-label p">penumbra · 75′</div>
-      <div class="edge-label u">umbra · 45′</div>
+          <polygon points="120,79 120,131 440,170 440,40" fill="url(#pen)"/>
+          <polygon points="120,79 120,131 410,105" fill="url(#umb)"/>
+
+          <g stroke="#e9e6dd" stroke-opacity=".3" stroke-width="1">
+            <line x1="8" y1="46" x2="104" y2="62"/>
+            <line x1="8" y1="76" x2="104" y2="84"/>
+            <line x1="8" y1="105" x2="104" y2="105"/>
+            <line x1="8" y1="134" x2="104" y2="126"/>
+            <line x1="8" y1="164" x2="104" y2="148"/>
+          </g>
+          <text x="8" y="32">SUNLIGHT</text>
+
+          <circle cx="120" cy="105" r="26" fill="#101a2e" stroke="#7d93a8" stroke-opacity=".55"/>
+          <path d="M120 79 A26 26 0 0 1 120 131" fill="#1b2c48"/>
+          <text x="94" y="155">EARTH</text>
+
+          <line x1="236" y1="105" x2="428" y2="105" stroke="#7d93a8" stroke-opacity=".4"
+                stroke-width="1" stroke-dasharray="4 5"/>
+          <text x="236" y="96">MOON’S ORBIT</text>
+
+          <g class="geo-moon is-anim">
+            <circle cx="242" cy="105" r="7" fill="#e9e6dd"/>
+          </g>
+
+          <text x="150" y="101" fill="#d98a52">UMBRA</text>
+          <text x="330" y="54">PENUMBRA</text>
+        </svg>
+        <figcaption>Geometry schematic — angles and distances not to scale. At the Moon's distance the umbra is about 2.9 lunar diameters wide, which is what makes a long totality possible.</figcaption>
+      </figure>
     </div>
+
+    <footer>
+      Modelled on an idealised central passage: Moon 15.5′, umbra 45′, penumbra 75′ in angular radius,
+      closing on the shadow at 30.6′ per hour. Real eclipses run shorter or longer with the Moon's
+      distance and with γ, its miss distance from the shadow axis.
+      <br>Built entirely with CSS animation — the clock, magnitude and phase readouts are animated
+      counters on the same timeline as the Moon.
+    </footer>
+
   </div>
-
-  <dl class="readout">
-    <div class="cell"><dt>Elapsed from P1</dt><dd id="r-clock">0:00</dd></div>
-    <div class="cell"><dt>Phase</dt><dd id="r-phase">Penumbral ingress</dd></div>
-    <div class="cell"><dt>Umbral magnitude</dt><dd id="r-mag">0.00</dd></div>
-    <div class="cell"><dt>From shadow axis</dt><dd id="r-sep">90.5<small>′</small></dd></div>
-  </dl>
-
-  <div class="controls">
-    <button id="toggle" aria-pressed="false">Pause</button>
-    <div class="scrub-wrap">
-      <span class="ctl-label" aria-hidden="true">P1</span>
-      <input id="scrub" type="range" min="0" max="1000" value="0" step="1" aria-label="Scrub through the eclipse">
-      <span class="ctl-label" aria-hidden="true">P4</span>
-    </div>
-    <select id="speed" aria-label="Playback speed">
-      <option value="0.5">0.5×</option>
-      <option value="1" selected>1×</option>
-      <option value="2">2×</option>
-      <option value="4">4×</option>
-    </select>
-  </div>
-
-  <h2>Contacts and phases</h2>
-  <div class="phases">
-    <div class="ph">
-      <span class="mark">P1→U1</span>
-      <span class="what"><b>Penumbral ingress.</b> A faint, flat grey wash on the leading limb — easy to miss by eye.</span>
-      <span class="when">0:00 · 59m</span>
-    </div>
-    <div class="ph">
-      <span class="mark">U1→U2</span>
-      <span class="what"><b>Partial ingress.</b> The umbra's curved edge bites in and crosses the disc.</span>
-      <span class="when">0:59 · 61m</span>
-    </div>
-    <div class="ph">
-      <span class="mark">U2→U3</span>
-      <span class="what"><b>Totality.</b> Wholly inside the umbra; greatest eclipse at 2:58, the Moon at its dimmest and reddest.</span>
-      <span class="when">2:00 · 1h56m</span>
-    </div>
-    <div class="ph">
-      <span class="mark">U3→U4</span>
-      <span class="what"><b>Partial egress.</b> A bright sliver returns on the leading limb and widens.</span>
-      <span class="when">3:56 · 61m</span>
-    </div>
-    <div class="ph">
-      <span class="mark">U4→P4</span>
-      <span class="what"><b>Penumbral egress.</b> The last grey shading thins away; the Moon is full again.</span>
-      <span class="when">4:57 · 59m</span>
-    </div>
-  </div>
-
-  <div class="cols">
-    <div class="prose">
-      <h2>Why it goes copper</h2>
-      <p class="drop">Nothing inside the umbra receives direct sunlight, so a totally eclipsed Moon ought to vanish. It doesn't. Earth's atmosphere refracts sunlight around the planet's limb and into the shadow, and on the way through it scatters the short wavelengths out — the same Rayleigh scattering that reddens a low Sun.</p>
-      <p>What reaches the Moon is therefore the light of <b>every sunrise and sunset on Earth at once</b>, focused into the shadow cone. Totality runs about 10,000 times fainter than a full Moon, and its colour reports on our own air: volcanic aerosol or heavy cloud along the terminator darkens it toward brown, clear air leaves it brick-red with a bright bluish rim where the refracted light has passed through the ozone layer.</p>
-      <p>Observers grade that appearance on <b>Danjon's five-point scale</b>, estimated at greatest eclipse with the unaided eye.</p>
-      <ul class="danjon">
-        <li><span class="lv">L = 0</span><span class="sw" style="background:#241a18"></span><span class="ds">Very dark; the Moon nearly invisible at mid-totality.</span></li>
-        <li><span class="lv">L = 1</span><span class="sw" style="background:#46302a"></span><span class="ds">Dark grey or brownish; detail hard to make out.</span></li>
-        <li><span class="lv">L = 2</span><span class="sw" style="background:#6e2f22"></span><span class="ds">Deep red or rust, with a darker umbral centre.</span></li>
-        <li><span class="lv">L = 3</span><span class="sw" style="background:#9c4425"></span><span class="ds">Brick-red, often with a brighter yellow rim.</span></li>
-        <li><span class="lv">L = 4</span><span class="sw" style="background:#c4682f"></span><span class="ds">Bright copper-orange; very bright, bluish rim.</span></li>
-      </ul>
-    </div>
-
-    <figure>
-      <h2>The shadow in section</h2>
-      <svg class="geo" viewBox="0 0 440 210" role="img"
-           aria-label="Side view: sunlight past the Earth forms a diverging penumbra and a converging umbra, and the Moon's orbit carries it through both.">
-        <defs>
-          <linearGradient id="pen" x1="0" x2="1">
-            <stop offset="0" stop-color="#7d93a8" stop-opacity=".16"/>
-            <stop offset="1" stop-color="#7d93a8" stop-opacity=".05"/>
-          </linearGradient>
-          <linearGradient id="umb" x1="0" x2="1">
-            <stop offset="0" stop-color="#b4562f" stop-opacity=".42"/>
-            <stop offset="1" stop-color="#b4562f" stop-opacity=".16"/>
-          </linearGradient>
-        </defs>
-
-        <!-- penumbra: diverging from the opposite limbs -->
-        <polygon points="120,79 120,131 440,170 440,40" fill="url(#pen)"/>
-        <!-- umbra: converging to its apex beyond the frame -->
-        <polygon points="120,79 120,131 410,105" fill="url(#umb)"/>
-
-        <!-- sunlight -->
-        <g stroke="#e9e6dd" stroke-opacity=".3" stroke-width="1">
-          <line x1="8" y1="46" x2="104" y2="62"/>
-          <line x1="8" y1="76" x2="104" y2="84"/>
-          <line x1="8" y1="105" x2="104" y2="105"/>
-          <line x1="8" y1="134" x2="104" y2="126"/>
-          <line x1="8" y1="164" x2="104" y2="148"/>
-        </g>
-        <text x="8" y="32">SUNLIGHT</text>
-
-        <!-- Earth -->
-        <circle cx="120" cy="105" r="26" fill="#101a2e" stroke="#7d93a8" stroke-opacity=".55"/>
-        <path d="M120 79 A26 26 0 0 1 120 131" fill="#1b2c48"/>
-        <text x="94" y="155">EARTH</text>
-
-        <!-- Moon's orbit -->
-        <line x1="236" y1="105" x2="428" y2="105" stroke="#7d93a8" stroke-opacity=".4"
-              stroke-width="1" stroke-dasharray="4 5"/>
-        <text x="236" y="96">MOON’S ORBIT</text>
-
-        <g class="geo-moon">
-          <circle cx="242" cy="105" r="7" fill="#e9e6dd"/>
-        </g>
-
-        <text x="150" y="101" fill="#d98a52">UMBRA</text>
-        <text x="330" y="54">PENUMBRA</text>
-      </svg>
-      <figcaption>Geometry schematic — angles and distances not to scale. At the Moon's distance the umbra is about 2.9 lunar diameters wide, which is what makes a long totality possible.</figcaption>
-    </figure>
-  </div>
-
-  <footer>
-    Modelled on an idealised central passage: Moon 15.5′, umbra 45′, penumbra 75′ in angular radius,
-    closing on the shadow at 30.6′ per hour. Real eclipses run shorter or longer with the Moon's
-    distance and with γ, its miss distance from the shadow axis.
-  </footer>
 </div>
-
-<script>
-(function(){
-  var moon=document.getElementById('moon'),
-      scrub=document.getElementById('scrub'),
-      toggle=document.getElementById('toggle'),
-      speedSel=document.getElementById('speed'),
-      elClock=document.getElementById('r-clock'),
-      elPhase=document.getElementById('r-phase'),
-      elMag=document.getElementById('r-mag'),
-      elSep=document.getElementById('r-sep');
-
-  var BASE=26,            // seconds for one full passage at 1x
-      TOTAL_MIN=356,      // P1 to P4
-      RM=15.5, RU=45, RP=75,
-      HALF=RP+RM;         // arcmin from P1 to greatest eclipse
-
-  var playing=true, p=0, dragging=false;
-
-  function durMs(){ return BASE/parseFloat(speedSel.value)*1000; }
-
-  // Every synced animation shares --dur; the twinkles have their own durations.
-  function synced(){
-    var d=durMs(), out=[];
-    document.getAnimations().forEach(function(a){
-      var t=a.effect&&a.effect.getTiming();
-      if(t&&Math.abs(t.duration-d)<2) out.push(a);
-    });
-    return out;
-  }
-  function all(){ return document.getAnimations(); }
-
-  function read(){
-    var a=moon.getAnimations()[0];
-    if(!a||!a.effect) return p;
-    var g=a.effect.getComputedTiming().progress;
-    return (g===null||g===undefined)?p:g;
-  }
-
-  function hhmm(min){
-    var h=Math.floor(min/60), m=Math.round(min%60);
-    if(m===60){h+=1;m=0;}
-    return h+':'+(m<10?'0':'')+m;
-  }
-  function phaseName(x){
-    if(x<0.1659) return 'Penumbral ingress';
-    if(x<0.3370) return 'Partial ingress';
-    if(x<0.4950) return 'Totality — deepening';
-    if(x<0.5050) return 'Greatest eclipse';
-    if(x<0.6630) return 'Totality — receding';
-    if(x<0.8341) return 'Partial egress';
-    return 'Penumbral egress';
-  }
-
-  function paint(x){
-    var sep=Math.abs(x-0.5)*2*HALF;                 // arcmin from the shadow axis
-    var mag=(RU+RM-sep)/(2*RM);                      // umbral magnitude
-    elClock.textContent=hhmm(x*TOTAL_MIN);
-    elPhase.textContent=phaseName(x);
-    elMag.textContent=(mag<=0?0:mag).toFixed(2);
-    elSep.innerHTML=sep.toFixed(1)+'<small>′</small>';
-    if(!dragging) scrub.value=Math.round(x*1000);
-  }
-
-  function seek(x){
-    var t=x*durMs();
-    synced().forEach(function(a){ a.currentTime=t; });
-    p=x; paint(x);
-  }
-
-  function setPlaying(on){
-    playing=on;
-    all().forEach(function(a){ on?a.play():a.pause(); });
-    toggle.textContent=on?'Pause':'Play';
-    toggle.setAttribute('aria-pressed',on?'false':'true');
-  }
-
-  scrub.addEventListener('pointerdown',function(){ dragging=true; setPlaying(false); });
-  scrub.addEventListener('pointerup',function(){ dragging=false; });
-  scrub.addEventListener('input',function(){ seek(scrub.value/1000); });
-
-  toggle.addEventListener('click',function(){ setPlaying(!playing); });
-
-  speedSel.addEventListener('change',function(){
-    var x=read();
-    // --dur lives on :root so one change reaches the stage, the phase table
-    // and the schematic together.
-    document.documentElement.style.setProperty('--dur',(BASE/parseFloat(speedSel.value))+'s');
-    requestAnimationFrame(function(){ seek(x); if(!playing) setPlaying(false); });
-  });
-
-  (function tick(){
-    if(playing){ p=read(); paint(p); }
-    requestAnimationFrame(tick);
-  })();
-
-  // Reduced motion: hold the page at greatest eclipse rather than animate.
-  var quiet=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)');
-  if(quiet&&quiet.matches){
-    requestAnimationFrame(function(){ setPlaying(false); seek(0.5); });
-  }else{
-    // Open on a recognisable partial bite, then carry on from there.
-    requestAnimationFrame(function(){ seek(0.26); });
-  }
-})();
-</script>
